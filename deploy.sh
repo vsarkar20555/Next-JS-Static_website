@@ -27,7 +27,7 @@ echo "Waiting for application health..."
 MAX_RETRIES=30
 COUNT=0
 
-until curl -f http://127.0.0.1:3000/api/health > /dev/null 2>&1
+until curl -f http://localhost:3000/api/health > /dev/null 2>&1
 do
     COUNT=$((COUNT+1))
 
