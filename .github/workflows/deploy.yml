@@ -33,22 +33,55 @@ jobs:
             --comment "Next.js Deployment" \
             --parameters 'commands=[
               "cd /opt/apps",
-              "echo Starting deployment",
+              "echo ==================================",
+              "echo Starting Deployment",
+              "echo ==================================",
               "git pull origin main",
               "npm install",
               "npm run build",
               "pm2 reload ecosystem.config.js",
-              "echo Waiting for health check",
-              "sleep 10",
+              "pm2 save",
+              "echo Waiting for application startup",
+              "sleep 15",
               "curl -f http://localhost:3000/api/health"
             ]' \
             --query "Command.CommandId" \
             --output text)
 
-          echo "Command ID: $COMMAND_ID"
+          echo "SSM Command ID: $COMMAND_ID"
 
-          sleep 5
+          STATUS="Pending"
+
+          echo "Waiting for deployment completion..."
+
+          while [ "$STATUS" = "Pending" ] || [ "$STATUS" = "InProgress" ] || [ "$STATUS" = "Delayed" ]
+          do
+
+            sleep 5
+
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id $COMMAND_ID \
+              --instance-id "i-0a82bcf38a1cbdc0e" \
+              --query "Status" \
+              --output text)
+
+            echo "Current Status: $STATUS"
+
+          done
+
+          echo "=================================="
+          echo "Final Deployment Output"
+          echo "=================================="
 
           aws ssm get-command-invocation \
             --command-id $COMMAND_ID \
             --instance-id "i-0a82bcf38a1cbdc0e"
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "Deployment Failed"
+            exit 1
+          fi
+
+          echo "=================================="
+          echo "Deployment Successful"
+          echo "=================================="
