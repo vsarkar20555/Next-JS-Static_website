@@ -32,29 +32,41 @@ jobs:
             --document-name "AWS-RunShellScript" \
             --comment "Next.js Deployment" \
             --parameters 'commands=[
+              "set -e",
               "cd /opt/apps",
+              "git config --global --add safe.directory /opt/apps",
               "echo ==================================",
               "echo Starting Deployment",
               "echo ==================================",
               "git pull origin main",
+              "echo Installing Dependencies",
               "npm install",
+              "echo Building Application",
               "npm run build",
+              "echo Reloading PM2 Cluster",
               "pm2 reload ecosystem.config.js",
               "pm2 save",
-              "echo Waiting for application startup",
+              "echo Waiting for Application Startup",
               "sleep 15",
-              "curl -f http://localhost:3000/api/health"
+              "echo Running Health Check",
+              "curl -f http://127.0.0.1:3000/api/health"
             ]' \
             --query "Command.CommandId" \
             --output text)
 
-          echo "SSM Command ID: $COMMAND_ID"
+          echo "=================================="
+          echo "SSM Command Triggered"
+          echo "=================================="
+
+          echo "Command ID: $COMMAND_ID"
 
           STATUS="Pending"
 
           echo "Waiting for deployment completion..."
 
-          while [ "$STATUS" = "Pending" ] || [ "$STATUS" = "InProgress" ] || [ "$STATUS" = "Delayed" ]
+          while [ "$STATUS" = "Pending" ] || \
+                [ "$STATUS" = "InProgress" ] || \
+                [ "$STATUS" = "Delayed" ]
           do
 
             sleep 5
@@ -70,7 +82,7 @@ jobs:
           done
 
           echo "=================================="
-          echo "Final Deployment Output"
+          echo "Final Deployment Logs"
           echo "=================================="
 
           aws ssm get-command-invocation \
@@ -78,7 +90,9 @@ jobs:
             --instance-id "i-0a82bcf38a1cbdc0e"
 
           if [ "$STATUS" != "Success" ]; then
+            echo "=================================="
             echo "Deployment Failed"
+            echo "=================================="
             exit 1
           fi
 
