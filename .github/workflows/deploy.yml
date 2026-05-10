@@ -34,7 +34,7 @@ jobs:
             --parameters 'commands=[
               "set -e",
               "cd /opt/apps",
-              "git config --global --add safe.directory /opt/apps",
+              "git config --system --add safe.directory /opt/apps",
               "echo ==================================",
               "echo Starting Deployment",
               "echo ==================================",
