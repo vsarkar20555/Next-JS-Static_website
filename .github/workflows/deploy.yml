@@ -40,7 +40,7 @@ jobs:
               "pm2 reload ecosystem.config.js",
               "echo Waiting for health check",
               "sleep 10",
-              "curl -f http://127.0.0.1:3000/api/health"
+              "curl -f http://localhost:3000/api/health"
             ]' \
             --query "Command.CommandId" \
             --output text)
