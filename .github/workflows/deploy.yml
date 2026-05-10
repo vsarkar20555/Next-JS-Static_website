@@ -49,7 +49,7 @@ jobs:
               "echo Waiting for Application Startup",
               "sleep 15",
               "echo Running Health Check",
-              "curl -f http://127.0.0.1:3000/api/health"
+              "curl -f http://localhost:3000/api/health"
             ]' \
             --query "Command.CommandId" \
             --output text)
