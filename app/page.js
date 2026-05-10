@@ -11,7 +11,7 @@ export default function Home() {
         fontFamily: 'Arial',
       }}
     >
-      Welcome User I am new user.
+      Welcome User I am V1.
     </main>
   )
 }
